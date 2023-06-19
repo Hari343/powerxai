@@ -1,22 +1,33 @@
-class Reading:
-    # TODO: change this to represent whatever information is needed
-    pass
+from typing import List
 
 
-# This is a fake database which stores data in-memory while the process is running
-# Feel free to change the data structure to anything else you would like
-database: dict[str, Reading] = {}
+class Database:
+    def __init__(self):
+        self.data = {}  # timestamp: {"voltage": float, "current": float}
+
+    def write(self, timestamp: int, metric: str, val: float) -> None:
+        metric = metric.lower()
+        if timestamp in self.data:
+            self.data[timestamp][metric] = val
+        else:
+            self.data[timestamp] = {metric: val}
+
+    def get(self, timestamp: int) -> dict:
+        return self.data.get(timestamp, {})
+
+    def query_range(self, start: int, end: int) -> List:
+        out = []
+        for key, val in sorted(self.data.items(), key=lambda x: x[0]):
+            if key > end:
+                break
+
+            if key < start:
+                continue
+
+            out.append((key, val))
+
+        return out
 
 
-def add_reading(key: str, reading: Reading) -> None:
-    """
-    Store a reading in the database using the given key
-    """
-    database[key] = reading
 
 
-def get_reading(key: str) -> Reading | None:
-    """
-    Retrieve a reading from the database using the given key
-    """
-    return database.get(key)
